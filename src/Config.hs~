@@ -1,0 +1,86 @@
+{-
+----------------------------------------------------------------
+-     This module regroups constants, and config
+-     features needed by the project.
+----------------------------------------------------------------
+-}
+
+module Config (
+                sWidth
+              , sHeight
+              , sBpp
+              , sFlags
+              , framesPerSecond
+              , secsPerFrame
+              , tileDim
+              , drawWindowW
+              , drawWindowH
+              , panelW
+              , panelH
+              , separatorW
+              , separatorH
+              , clips
+              , grid
+              , panel
+              ) where
+
+import Data.Array
+import Data.Word (Word16,Word32)
+
+import Graphics.UI.SDL
+
+
+
+sWidth, sHeight, sBpp :: Int
+sWidth   = 1056
+sHeight  = 768
+sBpp     = 32
+
+secsPerFrame, framesPerSecond :: Word32
+framesPerSecond = 24
+secsPerFrame    = 1000 `div` framesPerSecond
+
+sFlags :: [SurfaceFlag]
+sFlags = [SWSurface]
+
+-- Defined in pixels
+tileDim :: Int
+tileDim = 48
+
+-- Defined in tiles
+drawWindowW, drawWindowH, panelW, panelH, separatorW, separatorH :: Int
+drawWindowW = 16
+drawWindowH = 16
+panelW      = 5
+panelH      = 16
+separatorW  = 1
+separatorH  = 16
+
+-- Huge array used to clip sprites from the sprite sheet
+-- To be kept in order with TileType
+clips :: Array Word16 Rect --Alist
+clips = listArray (0, 2) [
+                          grid (0,0) -- 0 : Null
+                        , grid (1,0) -- 1 : Grass
+                        , grid (2,0) -- 2 : Rough
+                         ]
+
+
+
+-- Converts a (x,y) grid position to a SDL Rect (used for populating 
+--  the sprite sheet).
+--  Warning: (x,y) is given SDL-like, not matrix-like, BUT starting a zero
+grid :: (Int, Int) -> Rect
+grid (x,y) = Rect rX rY rW rH
+    where rW = tileDim
+          rH = tileDim
+          rX = x * tileDim
+          rY = y * tileDim
+
+
+
+-- The whole panel, containing all sprites
+-- Warning: arrays are accessed maths-like
+--          panel is filled LINE-BY-LINE
+panel :: Array (Int, Int) Word16
+panel = listArray ((0,0), (16 - 1, 20 - 1)) $ [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1] ++ [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0] ++ (concat $ repeat [1,2, 0])
