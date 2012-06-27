@@ -1,5 +1,0 @@
-splitEvery :: Int -> [a] -> [[a]]
-splitEvery n xs = let (l, xs') = splitAt n xs
-                  in l : case xs' of
-                           []     -> []
-                           xs''   -> splitEvery n xs''
