@@ -73,7 +73,9 @@ data AppData = AppData {
     , appFps          :: Timer     -- to cap frame rate
     , appCamera       :: Camera    -- our field of vision
     , appCurrentTile  :: Word16    -- the tile we are currently painting with
-    , appBye          :: Bool
+    , appBye          :: Bool      -- set to true for quitting
+    , appPainting     :: Bool      -- set for continuuous painting
+    , appBlockScroll  :: Bool
     } deriving (Show)
 
 {-

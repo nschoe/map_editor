@@ -37,6 +37,10 @@ module Helper (
               , putPanel
               , getBye
               , putBye
+              , getPainting
+              , putPainting
+              , getBlockScroll
+              , putBlockScroll
               ) where
 
 import Control.Monad (liftM)
@@ -188,3 +192,15 @@ getBye = liftM appBye get
 
 putBye :: MonadState AppData m => Bool -> m ()
 putBye b = modify $ \s -> s { appBye = b }
+
+getPainting :: MonadState AppData m => m Bool
+getPainting = liftM appPainting get
+
+putPainting :: MonadState AppData m => Bool -> m ()
+putPainting b = modify $ \s -> s { appPainting = b }
+
+getBlockScroll :: MonadState AppData m => m Bool
+getBlockScroll = liftM appBlockScroll get
+
+putBlockScroll :: MonadState AppData m => Bool -> m ()
+putBlockScroll b = modify $ \s -> s { appBlockScroll = b }

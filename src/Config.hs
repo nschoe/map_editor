@@ -60,7 +60,7 @@ separatorW  = 1
 separatorH  = 16
 iMax        = 19
 jMax        = 15
-nbOfTiles   = 40
+nbOfTiles   = 319
 
 -- Huge array used to clip sprites from the sprite sheet
 clips :: Array Word16 Rect --Alist

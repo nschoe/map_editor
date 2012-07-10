@@ -62,7 +62,13 @@ initEnv mapFile = do
   -- We don't want to quit yet
       bye = False
 
-  return (AppResource screen spriteSheet, AppData world panel fps camera currentTile bye)
+  -- We don't want to paint yet
+      painting = False
+
+  -- Scroll is allowed
+      blockScroll = False
+
+  return (AppResource screen spriteSheet, AppData world panel fps camera currentTile bye painting blockScroll)
 
 
 
@@ -97,6 +103,8 @@ handleEvents' _ (MouseButtonDown mouseX mouseY ButtonLeft) = do
     putCurrentTile newTile
 
   -- Handles tile painting
+  when (inField (mouseX', mouseY')) (putPainting True)
+{-
   when (inField (mouseX', mouseY')) $ do
      camera@(Rect cx cy _ _)     <- getCamera
      world@World{wField = field} <- getWorld
@@ -105,8 +113,11 @@ handleEvents' _ (MouseButtonDown mouseX mouseY ButtonLeft) = do
          (realXTile, realYTile) = (xTile + ptt cx, yTile + ptt cy)
          fieldModifier = [((realYTile, realXTile), currentTile)]
      putWorld world{wField = (field // fieldModifier)}
-
+-}
          where (mouseX', mouseY') = (fromIntegral mouseX, fromIntegral mouseY)
+
+handleEvents' _ (MouseButtonUp _ _ ButtonLeft) =
+    putPainting False
 
 -- Handles saving map on S press
 handleEvents' mapName (KeyDown (Keysym SDLK_s _ _)) = do
@@ -171,7 +182,13 @@ handleEvents' _ (KeyDown (Keysym SDLK_RIGHT _ _)) = do
       newField = tempField // oldFieldList
   putWorld world{wField = newField, wDim=(xDim + 1, yDim)}
   putCamera camera{rectX=(xDim + 1) * tileDim - (drawWindowW * tileDim)} -- Sets the camera at the right (to see the nealy created column)
-            
+
+-- Handles block scrolling
+handleEvents' _ (KeyDown (Keysym SDLK_SPACE _ _)) = do
+  putBlockScroll True
+
+handleEvents' _ (KeyUp (Keysym SDLK_SPACE _ _)) = do
+  putBlockScroll False
 
 handleEvents' _ _ = return ()
 
@@ -181,35 +198,57 @@ handleEvents' _ _ = return ()
 performLogic :: AppEnv ()
 performLogic = do
   -- Moves the camera when needed
+  scrollAllowed <- liftM not getBlockScroll
   camera@(Rect cx cy _ _) <- getCamera
   (mouseX, mouseY, _) <- liftIO getMouseState
   (width, height) <- getDim
 
   -- Right scrolling
-  when (mouseX >= (drawWindowW * tileDim) - (2 * tileDim) && mouseX <= (drawWindowW * tileDim)) $ do
+  when (scrollAllowed && mouseX >= (drawWindowW * tileDim) - (2 * tileDim) && mouseX <= (drawWindowW * tileDim)) $ do
                  let cx'  = cx + tileDim
                      cx'' = if (ptt cx' + drawWindowW) > width then cx else cx'
                  putCamera camera{rectX = cx''}
 
   -- Left scrolling
-  when (mouseX <= (2 * tileDim)) $ do
+  when (scrollAllowed && mouseX <= (2 * tileDim)) $ do
                  let cx'  = cx - tileDim
                      cx'' = if cx' < 0 then cx else cx'
                  putCamera camera{rectX = cx''}
 
   -- Top scrolling
-  when (inField (mouseX, mouseY) && mouseY <= (2 * tileDim)) $ do
+  when (scrollAllowed && inField (mouseX, mouseY) && mouseY <= (2 * tileDim)) $ do
                  let cy'  = cy - tileDim
                      cy'' = if cy' < 0 then cy else cy'
                  putCamera camera{rectY = cy''}
 
   -- Bottom scrolling
-  when (inField (mouseX, mouseY) && mouseY >= ((drawWindowH * tileDim) - (2 * tileDim))) $ do
+  when (scrollAllowed && inField (mouseX, mouseY) && mouseY >= ((drawWindowH * tileDim) - (2 * tileDim))) $ do
                  let cy'  = cy + tileDim
                      cy'' = if (ptt cy' + drawWindowH) > height then cy else cy'
                  putCamera camera{rectY = cy''}
-  
 
+  -- Paints the tiles on the field
+  painting <- getPainting
+  when painting paintTile
+
+
+
+-- Paints a tile on the field, at the mouse position
+paintTile :: AppEnv ()
+paintTile = do
+  -- We get the mouse (X,Y) position
+  (mouseX, mouseY, _)         <- liftIO getMouseState
+
+  -- Then we paint
+  camera@(Rect cx cy _ _)     <- getCamera
+  world@World{wField = field} <- getWorld
+  currentTile                 <- getCurrentTile
+  let (mouseX', mouseY') = (fromIntegral mouseX, fromIntegral mouseY)
+      (xTile, yTile) = (ptt mouseX', ptt mouseY')
+      (realXTile, realYTile) = (xTile + ptt cx, yTile + ptt cy)
+      fieldModifier          = [((realYTile, realXTile), currentTile)]
+  putWorld world{wField = (field // fieldModifier)}
+    
 
 
 -- Perform rendering
