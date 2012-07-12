@@ -58,14 +58,13 @@ panelW      = 5
 panelH      = 16
 separatorW  = 1
 separatorH  = 16
-iMax        = 19
+iMax        = 99
 jMax        = 15
-nbOfTiles   = 319
+nbOfTiles   = 1599
 
 -- Huge array used to clip sprites from the sprite sheet
 clips :: Array Word16 Rect --Alist
-clips = listArray (0, n) $ map grid [(j,i) | i <- [0..15], j <- [0..19]]
-    where n = 319
+clips = listArray (0, (fromIntegral nbOfTiles)) $ map grid [(j,i) | i <- [0..jMax], j <- [0..iMax]]
 {-clips = listArray (0, n) [grid (j,i) | i <- [0..iMax], j <- [0..jMax]]
     where iMax' = fromIntegral iMax
           jMax' = fromIntegral jMax

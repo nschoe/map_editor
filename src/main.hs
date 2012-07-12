@@ -128,7 +128,7 @@ handleEvents' mapName (KeyDown (Keysym SDLK_s _ _)) = do
 handleEvents' _ (MouseButtonDown _ _ ButtonWheelDown) = do
   (pX, pY) <- getPanel
   let pX'  = pX + panelW
-      pX'' = if (pX' + panelW) > (20 - 1) then (20 - panelW) else pX'
+      pX'' = if (pX' + panelW) > iMax then (iMax+1 - panelW) else pX'
   putPanel (pX'', pY)
 
 handleEvents' _ (MouseButtonDown _ _ ButtonWheelUp) = do
