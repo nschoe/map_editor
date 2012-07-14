@@ -24,7 +24,7 @@ import System.Directory (copyFile, doesFileExist)
 import System.Environment (getArgs)
 import System.Exit (exitFailure, exitSuccess)
 import System.FilePath ((</>))
-import System.IO (hPutStrLn, stderr)
+import System.IO (hPutStrLn, stderr, hPutStr, openFile, IOMode(..), hClose)
 
 import Config
 import Helper
@@ -189,6 +189,21 @@ handleEvents' _ (KeyDown (Keysym SDLK_SPACE _ _)) = do
 
 handleEvents' _ (KeyUp (Keysym SDLK_SPACE _ _)) = do
   putBlockScroll False
+
+-- Displays the tile type under the mouse
+handleEvents' _ (KeyDown (Keysym SDLK_z _ _)) = do
+  (mouseX, mouseY, _) <- liftIO $ getMouseState
+  
+  when (inField (fromIntegral mouseX, fromIntegral mouseY)) $ do
+    world@World{ wField = field } <- getWorld
+    (Rect cx cy _ _)              <- getCamera
+    let (mX, mY) = (ptt ((fromIntegral mouseX) + cx), ptt ((fromIntegral mouseY) + cy))
+        tileType = field ! (mY, mX)
+    
+    h <- liftIO $ openFile (root </> "forbidden") AppendMode
+    liftIO $ hPutStr h ((show tileType) ++ " ")
+    liftIO $ hClose h
+  
 
 handleEvents' _ _ = return ()
 
