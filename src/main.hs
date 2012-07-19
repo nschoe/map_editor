@@ -200,6 +200,7 @@ handleEvents' _ (KeyDown (Keysym SDLK_z _ _)) = do
     let (mX, mY) = (ptt ((fromIntegral mouseX) + cx), ptt ((fromIntegral mouseY) + cy))
         tileType = field ! (mY, mX)
     
+    liftIO $ putStrLn (show tileType)
     h <- liftIO $ openFile (root </> "forbidden") AppendMode
     liftIO $ hPutStr h ((show tileType) ++ " ")
     liftIO $ hClose h
