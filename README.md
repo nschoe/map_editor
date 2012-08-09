@@ -1,3 +1,8 @@
+/!\ Development stopped for now. /!\
+
+
+
+
 PoKemon Breizh Map Editor
 ================================
 
