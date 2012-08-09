@@ -14,6 +14,7 @@ module Types (
              , AppState
              , AppEnv
              , Panel
+             , EditingState(..)
              ) where
 
 import Control.Monad.Reader
@@ -69,17 +70,26 @@ data AppResource = AppResource {
 -- State of the application
 data AppData = AppData {
       appWorld        :: World     -- the map
+    , appEventMap     :: World     -- the associated event map
     , appPanel        :: Panel     -- top left corner of the panel (in tiles)
     , appFps          :: Timer     -- to cap frame rate
     , appCamera       :: Camera    -- our field of vision
     , appCurrentTile  :: Word16    -- the tile we are currently painting with
     , appBye          :: Bool      -- set to true for quitting
-    , appPainting     :: Bool      -- set for continuuous painting
-    , appBlockScroll  :: Bool
+    , appPainting     :: Bool      -- set for continuous painting
+    , appBlockScroll  :: Bool      -- Prevents the screen from scrolling
+    , appState        :: EditingState
     } deriving (Show)
+
+
+-- Custom state which describes the application (simplified version of State machine)
+data EditingState = Null          -- painting
+                  | EventMap      -- to display the transparent event map
+                  | EditEvent Int -- when setting an event
+                    deriving (Show,Eq)
 
 {-
 *****************************************************************
 *                      End of Custom Data Type
 *****************************************************************
--}
+-} 

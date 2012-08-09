@@ -47,6 +47,9 @@ initEnv mapFile = do
   -- Loads the map
   world <- parseMap (fmn mapFile)
 
+  -- Loads the event map
+  eventMap <- parseMap (fmn $ mapFile ++ "_events")
+
   -- Start the fps timer
   fps <- start defaultTimer
 
@@ -68,7 +71,10 @@ initEnv mapFile = do
   -- Scroll is allowed
       blockScroll = False
 
-  return (AppResource screen spriteSheet, AppData world panel fps camera currentTile bye painting blockScroll)
+  -- Don't display the event map
+      editingEvent = Null
+
+  return (AppResource screen spriteSheet, AppData world eventMap panel fps camera currentTile bye painting blockScroll editingEvent)
 
 
 
